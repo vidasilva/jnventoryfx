@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.vidasilva.jnventoryfx.controller.Controller"
+            minWidth="320"
+            minHeight="420"
+            prefWidth="800"
+            prefHeight="600">
+
+    <padding>
+        <Insets top="24" right="24" bottom="24" left="24"/>
+    </padding>
+
+    <top>
+        <VBox alignment="CENTER" spacing="8" maxWidth="Infinity">
+            <Text text="JnventoryFX"
+                  textAlignment="CENTER"
+                  style="-fx-font-size: 34px; -fx-font-weight: bold;"/>
+
+            <Label text="Auto parts inventory, sales, suppliers and warehouse tools. Because spreadsheets apparently were not painful enough."
+                   textAlignment="CENTER"
+                   alignment="CENTER"
+                   wrapText="true"
+                   maxWidth="Infinity"
+                   style="-fx-font-size: 14px;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <StackPane alignment="CENTER">
+            <BorderPane.margin>
+                <Insets top="24"/>
+            </BorderPane.margin>
+
+            <TabPane tabClosingPolicy="UNAVAILABLE"
+                     minWidth="280"
+                     maxWidth="480"
+                     maxHeight="Infinity"
+                     StackPane.alignment="CENTER">
+                <tabs>
+                    <Tab text="Sign In">
+                        <ScrollPane fitToWidth="true"
+                                    hbarPolicy="NEVER"
+                                    vbarPolicy="AS_NEEDED"
+                                    pannable="true">
+                            <content>
+                                <VBox spacing="12"
+                                      alignment="CENTER_LEFT"
+                                      fillWidth="true"
+                                      maxWidth="Infinity">
+                                    <padding>
+                                        <Insets top="24" right="24" bottom="24" left="24"/>
+                                    </padding>
+
+                                    <Label text="Email"/>
+                                    <TextField fx:id="signInEmailField"
+                                               promptText="admin@inventory.local"
+                                               maxWidth="Infinity"/>
+
+                                    <Label text="Password"/>
+                                    <PasswordField fx:id="signInPasswordField"
+                                                   promptText="admin123"
+                                                   maxWidth="Infinity"/>
+
+                                    <CheckBox fx:id="rememberMeCheckBox"
+                                              text="Remember me"
+                                              maxWidth="Infinity"/>
+
+                                    <Button text="Sign In"
+                                            maxWidth="Infinity"
+                                            onAction="#handleSignIn"/>
+
+                                    <Label text="Demo users: admin/admin123, manager/manager123, cashier/cashier123, warehouse/warehouse123 using @inventory.local emails."
+                                           wrapText="true"
+                                           style="-fx-font-size: 11px; -fx-opacity: 0.75;"/>
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </Tab>
+
+                    <Tab text="Sign Up">
+                        <ScrollPane fitToWidth="true"
+                                    hbarPolicy="NEVER"
+                                    vbarPolicy="AS_NEEDED"
+                                    pannable="true">
+                            <content>
+                                <VBox spacing="12"
+                                      alignment="CENTER_LEFT"
+                                      fillWidth="true"
+                                      maxWidth="Infinity">
+                                    <padding>
+                                        <Insets top="24" right="24" bottom="24" left="24"/>
+                                    </padding>
+
+                                    <Label text="Username"/>
+                                    <TextField fx:id="signUpUsernameField"
+                                               promptText="Choose a username"
+                                               maxWidth="Infinity"/>
+
+                                    <Label text="Email"/>
+                                    <TextField fx:id="signUpEmailField"
+                                               promptText="Enter your email"
+                                               maxWidth="Infinity"/>
+
+                                    <Label text="Password"/>
+                                    <PasswordField fx:id="signUpPasswordField"
+                                                   promptText="Create a password"
+                                                   maxWidth="Infinity"/>
+
+                                    <Label text="Confirm Password"/>
+                                    <PasswordField fx:id="confirmPasswordField"
+                                                   promptText="Confirm your password"
+                                                   maxWidth="Infinity"/>
+
+                                    <Button text="Create Cashier Account"
+                                            maxWidth="Infinity"
+                                            onAction="#handleSignUp"/>
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </Tab>
+                </tabs>
+            </TabPane>
+        </StackPane>
+    </center>
+</BorderPane>

@@ -1,0 +1,16 @@
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/App.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/controller/Controller.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/controller/DashboardController.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/database/Database.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/model/CarPart.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/model/Supplier.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/model/User.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/model/UserRole.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/repository/CarPartRepository.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/repository/SupplierRepository.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/repository/UserRepository.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/service/InventoryService.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/service/Session.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/service/SupplierService.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/br/com/vidasilva/jnventoryfx/service/UserService.java
+/home/vidasilva/Projects/Java/jnventoryfx/app/src/main/java/module-info.java

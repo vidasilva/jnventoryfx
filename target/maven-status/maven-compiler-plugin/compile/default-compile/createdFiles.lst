@@ -1,0 +1,17 @@
+br/com/vidasilva/jnventoryfx/model/User.class
+br/com/vidasilva/jnventoryfx/repository/CarPartRepository.class
+br/com/vidasilva/jnventoryfx/service/SupplierService.class
+br/com/vidasilva/jnventoryfx/service/UserService.class
+br/com/vidasilva/jnventoryfx/controller/DashboardController$1.class
+br/com/vidasilva/jnventoryfx/controller/DashboardController.class
+br/com/vidasilva/jnventoryfx/App.class
+br/com/vidasilva/jnventoryfx/service/InventoryService.class
+br/com/vidasilva/jnventoryfx/service/Session.class
+br/com/vidasilva/jnventoryfx/model/Supplier.class
+br/com/vidasilva/jnventoryfx/controller/Controller.class
+module-info.class
+br/com/vidasilva/jnventoryfx/model/CarPart.class
+br/com/vidasilva/jnventoryfx/repository/UserRepository.class
+br/com/vidasilva/jnventoryfx/model/UserRole.class
+br/com/vidasilva/jnventoryfx/database/Database.class
+br/com/vidasilva/jnventoryfx/repository/SupplierRepository.class

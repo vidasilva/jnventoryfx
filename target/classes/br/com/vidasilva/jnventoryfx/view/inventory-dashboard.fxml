@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.vidasilva.jnventoryfx.controller.DashboardController"
+            prefWidth="1200"
+            prefHeight="800"
+            minWidth="900"
+            minHeight="640">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16" style="-fx-padding: 16; -fx-border-color: transparent transparent #dddddd transparent;">
+            <VBox HBox.hgrow="ALWAYS">
+                <Text text="Auto Parts Inventory Dashboard" style="-fx-font-size: 26px; -fx-font-weight: bold;"/>
+                <Label fx:id="currentUserLabel" text="Signed in as"/>
+            </VBox>
+            <Label fx:id="lowStockSummaryLabel" text="Low stock warnings: 0" style="-fx-font-weight: bold;"/>
+            <Button text="Logout" onAction="#handleLogout"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Parts / Sales">
+                    <BorderPane>
+                        <top>
+                            <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 12;">
+                                <TextField fx:id="searchField" promptText="Search by ID, name, supplier, vehicle, location..." HBox.hgrow="ALWAYS"/>
+                                <Button text="Find Product" onAction="#handleSearchParts"/>
+                                <Button text="Reset" onAction="#handleResetSearch"/>
+                            </HBox>
+                        </top>
+
+                        <center>
+                            <TableView fx:id="partsTable">
+                                <columns>
+                                    <TableColumn fx:id="partIdColumn" text="ID" prefWidth="50"/>
+                                    <TableColumn fx:id="partNameColumn" text="Part" prefWidth="150"/>
+                                    <TableColumn fx:id="partManufacturerColumn" text="Manufacturer" prefWidth="120"/>
+                                    <TableColumn fx:id="partVehiclesColumn" text="Compatible Vehicles" prefWidth="210"/>
+                                    <TableColumn fx:id="partSupplierColumn" text="Supplier" prefWidth="150"/>
+                                    <TableColumn fx:id="partPriceColumn" text="Price" prefWidth="80"/>
+                                    <TableColumn fx:id="partQuantityColumn" text="Qty" prefWidth="70"/>
+                                    <TableColumn fx:id="partAddressColumn" text="Location" prefWidth="90"/>
+                                    <TableColumn fx:id="partMaxCapacityColumn" text="Max" prefWidth="70"/>
+                                    <TableColumn fx:id="partLowLevelColumn" text="Low Alert" prefWidth="80"/>
+                                    <TableColumn fx:id="partStatusColumn" text="Status" prefWidth="90"/>
+                                </columns>
+                            </TableView>
+                        </center>
+
+                        <bottom>
+                            <SplitPane dividerPositions="0.65" style="-fx-padding: 12;">
+                                <VBox fx:id="partRegistrationPane" spacing="8">
+                                    <Label text="Register Car Part" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                    <GridPane hgap="8" vgap="8">
+                                        <columnConstraints>
+                                            <ColumnConstraints percentWidth="20"/>
+                                            <ColumnConstraints percentWidth="30"/>
+                                            <ColumnConstraints percentWidth="20"/>
+                                            <ColumnConstraints percentWidth="30"/>
+                                        </columnConstraints>
+
+                                        <Label text="Part Name" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                        <TextField fx:id="partNameField" promptText="Brake pad set" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                        <Label text="Manufacturer" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                                        <TextField fx:id="partManufacturerField" promptText="Bosch" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                                        <Label text="Vehicles" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                        <TextField fx:id="partVehiclesField" promptText="Civic 2016-2021" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                        <Label text="Supplier" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                        <ComboBox fx:id="partSupplierComboBox" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                                        <Label text="Price" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                        <TextField fx:id="partPriceField" promptText="189.90" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                        <Label text="Quantity" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                                        <TextField fx:id="partQuantityField" promptText="24" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                                        <Label text="Location" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                        <TextField fx:id="partWarehouseAddressField" promptText="A-01-03" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                                        <Label text="Max Capacity" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                                        <TextField fx:id="partMaxCapacityField" promptText="50" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+
+                                        <Label text="Low Alert" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                        <TextField fx:id="partLowLevelField" promptText="10" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                                    </GridPane>
+                                    <Button text="Register Part" onAction="#handleRegisterPart" maxWidth="Infinity"/>
+                                </VBox>
+
+                                <VBox fx:id="salePane" spacing="8">
+                                    <Label text="Register Sale" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                    <Label text="Select a part above or type its ID." wrapText="true"/>
+                                    <TextField fx:id="salePartIdField" promptText="Part ID"/>
+                                    <TextField fx:id="saleQuantityField" promptText="Sale quantity"/>
+                                    <Button text="Sell / Reduce Stock" onAction="#handleSellPart" maxWidth="Infinity"/>
+                                </VBox>
+                            </SplitPane>
+                        </bottom>
+                    </BorderPane>
+                </Tab>
+
+                <Tab fx:id="suppliersTab" text="Suppliers">
+                    <BorderPane>
+                        <center>
+                            <TableView fx:id="suppliersTable">
+                                <columns>
+                                    <TableColumn fx:id="supplierIdColumn" text="ID" prefWidth="50"/>
+                                    <TableColumn fx:id="supplierNameColumn" text="Name" prefWidth="160"/>
+                                    <TableColumn fx:id="supplierPhoneColumn" text="Phone" prefWidth="140"/>
+                                    <TableColumn fx:id="supplierEmailColumn" text="Email" prefWidth="170"/>
+                                    <TableColumn fx:id="supplierAddressColumn" text="Address" prefWidth="200"/>
+                                    <TableColumn fx:id="supplierNotesColumn" text="Notes" prefWidth="260"/>
+                                </columns>
+                            </TableView>
+                        </center>
+                        <bottom>
+                            <VBox fx:id="supplierRegistrationPane" spacing="8" style="-fx-padding: 12;">
+                                <Label text="Supplier Details" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <GridPane hgap="8" vgap="8">
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="15"/>
+                                        <ColumnConstraints percentWidth="35"/>
+                                        <ColumnConstraints percentWidth="15"/>
+                                        <ColumnConstraints percentWidth="35"/>
+                                    </columnConstraints>
+
+                                    <Label text="Name" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="supplierNameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                    <Label text="Phone" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="supplierPhoneField" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                                    <Label text="Email" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="supplierEmailField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                    <Label text="Address" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="supplierAddressField" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                                    <Label text="Notes" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="supplierNotesField" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                                </GridPane>
+                                <Button text="Save Supplier" onAction="#handleRegisterSupplier" maxWidth="Infinity"/>
+                            </VBox>
+                        </bottom>
+                    </BorderPane>
+                </Tab>
+
+                <Tab fx:id="warehouseTab" text="Warehouse Tools">
+                    <VBox spacing="12" style="-fx-padding: 16;">
+                        <Label text="Find products in the Parts / Sales tab, select one, then update its warehouse data here. Apparently boxes do not teleport to the correct shelf by moral obligation." wrapText="true"/>
+
+                        <VBox fx:id="warehouseUpdatePane" spacing="8">
+                            <Label text="Update Product Address and Capacity Rules" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                            <GridPane hgap="8" vgap="8">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="20"/>
+                                    <ColumnConstraints percentWidth="30"/>
+                                    <ColumnConstraints percentWidth="20"/>
+                                    <ColumnConstraints percentWidth="30"/>
+                                </columnConstraints>
+
+                                <Label text="Part ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                <TextField fx:id="warehousePartIdField" promptText="Part ID" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                <Label text="New Address" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                                <TextField fx:id="warehouseAddressField" promptText="A-01-03" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                                <Label text="Max Capacity" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                <TextField fx:id="warehouseMaxCapacityField" promptText="50" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                <Label text="Low Stock Alert" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                <TextField fx:id="warehouseLowLevelField" promptText="10" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                            </GridPane>
+                            <Button text="Update Warehouse Data" onAction="#handleUpdateWarehouseData" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+                </Tab>
+
+                <Tab fx:id="usersTab" text="Users / Roles">
+                    <BorderPane>
+                        <center>
+                            <TableView fx:id="usersTable">
+                                <columns>
+                                    <TableColumn fx:id="userNameColumn" text="Username" prefWidth="180"/>
+                                    <TableColumn fx:id="userEmailColumn" text="Email" prefWidth="260"/>
+                                    <TableColumn fx:id="userRoleColumn" text="Role" prefWidth="160"/>
+                                </columns>
+                            </TableView>
+                        </center>
+                        <bottom>
+                            <VBox fx:id="userRegistrationPane" spacing="8" style="-fx-padding: 12;">
+                                <Label text="Create User" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <GridPane hgap="8" vgap="8">
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="15"/>
+                                        <ColumnConstraints percentWidth="35"/>
+                                        <ColumnConstraints percentWidth="15"/>
+                                        <ColumnConstraints percentWidth="35"/>
+                                    </columnConstraints>
+
+                                    <Label text="Username" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="newUsernameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                    <Label text="Email" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="newUserEmailField" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                                    <Label text="Password" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <PasswordField fx:id="newUserPasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                    <Label text="Role" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                    <ComboBox fx:id="newUserRoleComboBox" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                                </GridPane>
+                                <Button text="Create User" onAction="#handleCreateUser" maxWidth="Infinity"/>
+                            </VBox>
+                        </bottom>
+                    </BorderPane>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>
