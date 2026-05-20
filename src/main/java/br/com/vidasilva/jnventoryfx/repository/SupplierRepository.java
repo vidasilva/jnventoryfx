@@ -54,7 +54,9 @@ public class SupplierRepository {
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    return new Supplier(generatedKeys.getInt(1), name, phone, email, address, notes);
+                    Supplier supplier = new Supplier(generatedKeys.getInt(1), name, phone, email, address, notes);
+                    Database.persistEncryptedCopy();
+                    return supplier;
                 }
             }
 

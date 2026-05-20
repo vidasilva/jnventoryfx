@@ -205,14 +205,44 @@
                                     <Label text="Email" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
                                     <TextField fx:id="newUserEmailField" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-                                    <Label text="Password" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                                    <PasswordField fx:id="newUserPasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                                    <Label text="Role" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                                    <ComboBox fx:id="newUserRoleComboBox" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                                    <Label text="Role" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <ComboBox fx:id="newUserRoleComboBox" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                    <Label text="A temporary password will be generated for new accounts. Password recovery uses emailed reset codes."
+                                           wrapText="true"
+                                           GridPane.rowIndex="1"
+                                           GridPane.columnIndex="2"
+                                           GridPane.columnSpan="2"/>
                                 </GridPane>
-                                <Button text="Create User" onAction="#handleCreateUser" maxWidth="Infinity"/>
+                                <HBox spacing="8">
+                                    <Button text="Create User" onAction="#handleCreateUser" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                                    <Button text="Email Reset Code to Selected User" onAction="#handleResetSelectedUserPassword" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                                </HBox>
                             </VBox>
                         </bottom>
+                    </BorderPane>
+                </Tab>
+
+                <Tab fx:id="auditTab" text="Audit Logs">
+                    <BorderPane>
+                        <top>
+                            <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 12;">
+                                <Label text="Recent security and business events. Finally, accountability, humanity's least favorite feature." wrapText="true" HBox.hgrow="ALWAYS"/>
+                                <Button text="Refresh" onAction="#handleRefreshAuditLogs"/>
+                            </HBox>
+                        </top>
+                        <center>
+                            <TableView fx:id="auditTable">
+                                <columns>
+                                    <TableColumn fx:id="auditTimeColumn" text="Time" prefWidth="150"/>
+                                    <TableColumn fx:id="auditActorColumn" text="Actor" prefWidth="210"/>
+                                    <TableColumn fx:id="auditRoleColumn" text="Role" prefWidth="90"/>
+                                    <TableColumn fx:id="auditActionColumn" text="Action" prefWidth="150"/>
+                                    <TableColumn fx:id="auditTargetColumn" text="Target" prefWidth="170"/>
+                                    <TableColumn fx:id="auditStatusColumn" text="Status" prefWidth="90"/>
+                                    <TableColumn fx:id="auditDetailsColumn" text="Details" prefWidth="340"/>
+                                </columns>
+                            </TableView>
+                        </center>
                     </BorderPane>
                 </Tab>
             </tabs>

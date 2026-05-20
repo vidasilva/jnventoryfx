@@ -3,6 +3,7 @@ package br.com.vidasilva.jnventoryfx.repository;
 import br.com.vidasilva.jnventoryfx.database.Database;
 import br.com.vidasilva.jnventoryfx.model.CarPart;
 import br.com.vidasilva.jnventoryfx.model.Supplier;
+import br.com.vidasilva.jnventoryfx.model.WarehouseAddress;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,17 +24,22 @@ public class CarPartRepository {
                     cp.compatible_vehicles,
                     cp.unit_price,
                     cp.quantity,
-                    cp.warehouse_address,
-                    cp.max_capacity,
-                    cp.low_capacity_warning_trigger_level,
                     s.id AS supplier_id,
                     s.name AS supplier_name,
                     s.phone AS supplier_phone,
                     s.email AS supplier_email,
                     s.address AS supplier_address,
-                    s.notes AS supplier_notes
+                    s.notes AS supplier_notes,
+                    wa.id AS warehouse_address_id,
+                    wa.street AS warehouse_street,
+                    wa.building AS warehouse_building,
+                    wa.level AS warehouse_level,
+                    wa.apto AS warehouse_apto,
+                    wa.max_capacity AS warehouse_max_capacity,
+                    wa.low_capacity_warning_trigger_level AS warehouse_low_capacity_warning_trigger_level
                 FROM car_parts cp
                 JOIN suppliers s ON s.id = cp.supplier_id
+                JOIN warehouse_addresses wa ON wa.id = cp.warehouse_address_id
                 ORDER BY cp.id
                 """;
 
@@ -60,9 +66,7 @@ public class CarPartRepository {
             Supplier supplier,
             double unitPrice,
             int quantity,
-            String warehouseAddress,
-            int maxCapacity,
-            int lowCapacityWarningTriggerLevel
+            WarehouseAddress warehouseAddress
     ) {
         String sql = """
                 INSERT INTO car_parts (
@@ -72,11 +76,9 @@ public class CarPartRepository {
                     supplier_id,
                     unit_price,
                     quantity,
-                    warehouse_address,
-                    max_capacity,
-                    low_capacity_warning_trigger_level
+                    warehouse_address_id
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (Connection connection = Database.connect();
@@ -88,14 +90,12 @@ public class CarPartRepository {
             statement.setInt(4, supplier.getId());
             statement.setDouble(5, unitPrice);
             statement.setInt(6, quantity);
-            statement.setString(7, warehouseAddress);
-            statement.setInt(8, maxCapacity);
-            statement.setInt(9, lowCapacityWarningTriggerLevel);
+            statement.setInt(7, warehouseAddress.getId());
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    return new CarPart(
+                    CarPart carPart = new CarPart(
                             generatedKeys.getInt(1),
                             name,
                             manufacturer,
@@ -103,10 +103,10 @@ public class CarPartRepository {
                             supplier,
                             unitPrice,
                             quantity,
-                            warehouseAddress,
-                            maxCapacity,
-                            lowCapacityWarningTriggerLevel
+                            warehouseAddress
                     );
+                    Database.persistEncryptedCopy();
+                    return carPart;
                 }
             }
 
@@ -146,6 +146,7 @@ public class CarPartRepository {
                 insertSaleStatement.executeUpdate();
 
                 connection.commit();
+                Database.persistEncryptedCopy();
             } catch (SQLException exception) {
                 connection.rollback();
                 throw exception;
@@ -157,30 +158,27 @@ public class CarPartRepository {
         }
     }
 
-    public void updateWarehouseData(int partId, String warehouseAddress, int maxCapacity, int lowCapacityWarningTriggerLevel) {
+    public void updateWarehouseAddress(int partId, int warehouseAddressId) {
         String sql = """
                 UPDATE car_parts
-                SET warehouse_address = ?,
-                    max_capacity = ?,
-                    low_capacity_warning_trigger_level = ?
+                SET warehouse_address_id = ?
                 WHERE id = ?
                 """;
 
         try (Connection connection = Database.connect();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setString(1, warehouseAddress);
-            statement.setInt(2, maxCapacity);
-            statement.setInt(3, lowCapacityWarningTriggerLevel);
-            statement.setInt(4, partId);
+            statement.setInt(1, warehouseAddressId);
+            statement.setInt(2, partId);
 
             int rowsUpdated = statement.executeUpdate();
 
             if (rowsUpdated == 0) {
                 throw new IllegalArgumentException("Part not found.");
             }
+            Database.persistEncryptedCopy();
         } catch (SQLException exception) {
-            throw new IllegalStateException("Could not update warehouse data in SQLite.", exception);
+            throw new IllegalStateException("Could not update part warehouse address in SQLite.", exception);
         }
     }
 
@@ -194,6 +192,16 @@ public class CarPartRepository {
                 resultSet.getString("supplier_notes")
         );
 
+        WarehouseAddress warehouseAddress = new WarehouseAddress(
+                resultSet.getInt("warehouse_address_id"),
+                resultSet.getString("warehouse_street").charAt(0),
+                resultSet.getInt("warehouse_building"),
+                resultSet.getInt("warehouse_level"),
+                resultSet.getInt("warehouse_apto"),
+                resultSet.getInt("warehouse_max_capacity"),
+                resultSet.getInt("warehouse_low_capacity_warning_trigger_level")
+        );
+
         return new CarPart(
                 resultSet.getInt("id"),
                 resultSet.getString("name"),
@@ -202,9 +210,7 @@ public class CarPartRepository {
                 supplier,
                 resultSet.getDouble("unit_price"),
                 resultSet.getInt("quantity"),
-                resultSet.getString("warehouse_address"),
-                resultSet.getInt("max_capacity"),
-                resultSet.getInt("low_capacity_warning_trigger_level")
+                warehouseAddress
         );
     }
 }

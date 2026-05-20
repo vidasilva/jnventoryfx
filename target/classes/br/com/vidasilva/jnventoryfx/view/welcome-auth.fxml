@@ -76,6 +76,10 @@
                                             maxWidth="Infinity"
                                             onAction="#handleSignIn"/>
 
+                                    <Button text="Forgot password?"
+                                            maxWidth="Infinity"
+                                            onAction="#handleForgotPassword"/>
+
                                     <Label text="Demo users: admin/admin123, manager/manager123, cashier/cashier123, warehouse/warehouse123 using @inventory.local emails."
                                            wrapText="true"
                                            style="-fx-font-size: 11px; -fx-opacity: 0.75;"/>

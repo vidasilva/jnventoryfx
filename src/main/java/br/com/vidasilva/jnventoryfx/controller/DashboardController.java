@@ -1,9 +1,13 @@
 package br.com.vidasilva.jnventoryfx.controller;
 
+import br.com.vidasilva.jnventoryfx.model.AuditLog;
 import br.com.vidasilva.jnventoryfx.model.CarPart;
 import br.com.vidasilva.jnventoryfx.model.Supplier;
 import br.com.vidasilva.jnventoryfx.model.User;
 import br.com.vidasilva.jnventoryfx.model.UserRole;
+import br.com.vidasilva.jnventoryfx.security.AuthorizationService;
+import br.com.vidasilva.jnventoryfx.security.Permission;
+import br.com.vidasilva.jnventoryfx.service.AuditService;
 import br.com.vidasilva.jnventoryfx.service.InventoryService;
 import br.com.vidasilva.jnventoryfx.service.Session;
 import br.com.vidasilva.jnventoryfx.service.SupplierService;
@@ -18,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
@@ -34,6 +39,7 @@ public class DashboardController {
     @FXML private Tab suppliersTab;
     @FXML private Tab warehouseTab;
     @FXML private Tab usersTab;
+    @FXML private Tab auditTab;
 
     @FXML private VBox partRegistrationPane;
     @FXML private VBox salePane;
@@ -94,24 +100,39 @@ public class DashboardController {
 
     @FXML private TextField newUsernameField;
     @FXML private TextField newUserEmailField;
-    @FXML private TextField newUserPasswordField;
     @FXML private ComboBox<UserRole> newUserRoleComboBox;
+
+    @FXML private TableView<AuditLog> auditTable;
+    @FXML private TableColumn<AuditLog, String> auditTimeColumn;
+    @FXML private TableColumn<AuditLog, String> auditActorColumn;
+    @FXML private TableColumn<AuditLog, String> auditRoleColumn;
+    @FXML private TableColumn<AuditLog, String> auditActionColumn;
+    @FXML private TableColumn<AuditLog, String> auditTargetColumn;
+    @FXML private TableColumn<AuditLog, String> auditStatusColumn;
+    @FXML private TableColumn<AuditLog, String> auditDetailsColumn;
 
     private final InventoryService inventoryService = new InventoryService();
     private final SupplierService supplierService = new SupplierService();
     private final UserService userService = new UserService();
+    private final AuditService auditService = new AuditService();
 
     @FXML
     private void initialize() {
         configurePartTable();
         configureSupplierTable();
         configureUserTable();
+        configureAuditTable();
         configureComboBoxes();
         configureSelectionListeners();
 
         partsTable.setItems(inventoryService.getParts());
         suppliersTable.setItems(supplierService.getSuppliers());
         usersTable.setItems(userService.getUsers());
+        if (AuthorizationService.currentUserCan(Permission.VIEW_AUDIT_LOGS)) {
+            auditTable.setItems(auditService.getRecentLogs());
+        } else {
+            auditTable.setItems(FXCollections.observableArrayList());
+        }
 
         applyCurrentUserPermissions();
         updateLowStockSummary();
@@ -135,6 +156,8 @@ public class DashboardController {
             clearPartForm();
             refreshInventoryView();
             showInfo("Part Registered", "The car part was added to inventory.");
+        } catch (SecurityException exception) {
+            showError("Access Denied", exception.getMessage());
         } catch (IllegalArgumentException exception) {
             showError("Invalid Part", exception.getMessage());
         }
@@ -150,6 +173,8 @@ public class DashboardController {
             saleQuantityField.clear();
             refreshInventoryView();
             showInfo("Sale Registered", "Stock was updated for the sale.");
+        } catch (SecurityException exception) {
+            showError("Access Denied", exception.getMessage());
         } catch (IllegalArgumentException exception) {
             showError("Sale Failed", exception.getMessage());
         }
@@ -183,6 +208,8 @@ public class DashboardController {
             clearSupplierForm();
             suppliersTable.refresh();
             showInfo("Supplier Registered", "Supplier details were saved.");
+        } catch (SecurityException exception) {
+            showError("Access Denied", exception.getMessage());
         } catch (IllegalArgumentException exception) {
             showError("Invalid Supplier", exception.getMessage());
         }
@@ -200,6 +227,8 @@ public class DashboardController {
 
             refreshInventoryView();
             showInfo("Warehouse Updated", "Location and capacity data were updated.");
+        } catch (SecurityException exception) {
+            showError("Access Denied", exception.getMessage());
         } catch (IllegalArgumentException exception) {
             showError("Warehouse Update Failed", exception.getMessage());
         }
@@ -208,22 +237,58 @@ public class DashboardController {
     @FXML
     private void handleCreateUser() {
         UserRole role = newUserRoleComboBox.getValue();
-        boolean created = userService.registerUser(
-                newUsernameField.getText(),
-                newUserEmailField.getText(),
-                newUserPasswordField.getText(),
-                newUserPasswordField.getText(),
-                role
-        );
+        try {
+            UserService.UserCreationResult result = userService.createUserWithTemporaryPassword(
+                    newUsernameField.getText(),
+                    newUserEmailField.getText(),
+                    role
+            );
 
-        if (!created) {
-            showError("User Not Created", "Check username, email, password and role. The email may already exist.");
+            if (result == null) {
+                showError("User Not Created", "Check username, email and role. The email may already exist.");
+                return;
+            }
+
+            clearUserForm();
+            usersTable.refresh();
+            auditService.refreshRecentLogs();
+            showTemporaryPassword(result.user().getEmail(), result.temporaryPassword());
+        } catch (SecurityException exception) {
+            showError("Access Denied", exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            showError("User Not Created", exception.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleResetSelectedUserPassword() {
+        User selectedUser = usersTable.getSelectionModel().getSelectedItem();
+
+        if (selectedUser == null) {
+            showError("No User Selected", "Select a user before sending a reset code.");
             return;
         }
 
-        clearUserForm();
-        usersTable.refresh();
-        showInfo("User Created", "The new user account was created.");
+        try {
+            UserService.PasswordResetRequestResult result = userService.sendPasswordResetEmailForUser(selectedUser.getEmail());
+            usersTable.refresh();
+            auditService.refreshRecentLogs();
+            showPasswordResetDelivery(result);
+        } catch (SecurityException exception) {
+            showError("Access Denied", exception.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            showError("Password Reset Email Failed", exception.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleRefreshAuditLogs() {
+        try {
+            auditService.refreshRecentLogs();
+            auditTable.refresh();
+        } catch (SecurityException exception) {
+            showError("Access Denied", exception.getMessage());
+        }
     }
 
     @FXML
@@ -254,7 +319,7 @@ public class DashboardController {
         partSupplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplierName"));
         partPriceColumn.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
         partQuantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        partAddressColumn.setCellValueFactory(new PropertyValueFactory<>("warehouseAddress"));
+        partAddressColumn.setCellValueFactory(new PropertyValueFactory<>("warehouseAddressLabel"));
         partMaxCapacityColumn.setCellValueFactory(new PropertyValueFactory<>("maxCapacity"));
         partLowLevelColumn.setCellValueFactory(new PropertyValueFactory<>("lowCapacityWarningTriggerLevel"));
         partStatusColumn.setCellValueFactory(new PropertyValueFactory<>("stockStatus"));
@@ -273,6 +338,16 @@ public class DashboardController {
         userNameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
         userEmailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         userRoleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
+    }
+
+    private void configureAuditTable() {
+        auditTimeColumn.setCellValueFactory(new PropertyValueFactory<>("eventTime"));
+        auditActorColumn.setCellValueFactory(new PropertyValueFactory<>("actorEmail"));
+        auditRoleColumn.setCellValueFactory(new PropertyValueFactory<>("actorRole"));
+        auditActionColumn.setCellValueFactory(new PropertyValueFactory<>("action"));
+        auditTargetColumn.setCellValueFactory(new PropertyValueFactory<>("targetId"));
+        auditStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+        auditDetailsColumn.setCellValueFactory(new PropertyValueFactory<>("details"));
     }
 
     private void configureComboBoxes() {
@@ -305,7 +380,7 @@ public class DashboardController {
 
             salePartIdField.setText(String.valueOf(selectedPart.getId()));
             warehousePartIdField.setText(String.valueOf(selectedPart.getId()));
-            warehouseAddressField.setText(selectedPart.getWarehouseAddress());
+            warehouseAddressField.setText(selectedPart.getWarehouseAddressLabel());
             warehouseMaxCapacityField.setText(String.valueOf(selectedPart.getMaxCapacity()));
             warehouseLowLevelField.setText(String.valueOf(selectedPart.getLowCapacityWarningTriggerLevel()));
         });
@@ -316,28 +391,38 @@ public class DashboardController {
 
         if (currentUser == null) {
             currentUserLabel.setText("Signed in as Guest");
+            disableProtectedControls();
             return;
         }
 
         UserRole role = currentUser.getRole();
         currentUserLabel.setText("Signed in as " + currentUser.getUsername() + " (" + role.getLabel() + ")");
 
-        boolean admin = role == UserRole.ADMIN;
-        boolean manager = role == UserRole.MANAGER;
-        boolean cashier = role == UserRole.CASHIER;
-        boolean warehouse = role == UserRole.WAREHOUSE;
+        partRegistrationPane.setDisable(!AuthorizationService.currentUserCan(Permission.REGISTER_PART));
+        salePane.setDisable(!AuthorizationService.currentUserCan(Permission.SELL_PART));
 
-        partRegistrationPane.setDisable(!(admin || manager));
-        salePane.setDisable(!(admin || manager || cashier));
+        suppliersTab.setDisable(!AuthorizationService.currentUserCan(Permission.VIEW_SUPPLIERS));
+        supplierRegistrationPane.setDisable(!AuthorizationService.currentUserCan(Permission.MANAGE_SUPPLIERS));
 
-        suppliersTab.setDisable(!(admin || manager));
-        supplierRegistrationPane.setDisable(!(admin || manager));
+        warehouseTab.setDisable(!AuthorizationService.currentUserCan(Permission.UPDATE_WAREHOUSE));
+        warehouseUpdatePane.setDisable(!AuthorizationService.currentUserCan(Permission.UPDATE_WAREHOUSE));
 
-        warehouseTab.setDisable(!(admin || manager || warehouse));
-        warehouseUpdatePane.setDisable(!(admin || manager || warehouse));
+        usersTab.setDisable(!AuthorizationService.currentUserCan(Permission.VIEW_USERS));
+        userRegistrationPane.setDisable(!AuthorizationService.currentUserCan(Permission.MANAGE_USERS));
 
-        usersTab.setDisable(!admin);
-        userRegistrationPane.setDisable(!admin);
+        auditTab.setDisable(!AuthorizationService.currentUserCan(Permission.VIEW_AUDIT_LOGS));
+    }
+
+    private void disableProtectedControls() {
+        partRegistrationPane.setDisable(true);
+        salePane.setDisable(true);
+        suppliersTab.setDisable(true);
+        supplierRegistrationPane.setDisable(true);
+        warehouseTab.setDisable(true);
+        warehouseUpdatePane.setDisable(true);
+        usersTab.setDisable(true);
+        userRegistrationPane.setDisable(true);
+        auditTab.setDisable(true);
     }
 
     private void refreshInventoryView() {
@@ -393,8 +478,37 @@ public class DashboardController {
     private void clearUserForm() {
         newUsernameField.clear();
         newUserEmailField.clear();
-        newUserPasswordField.clear();
         newUserRoleComboBox.getSelectionModel().select(UserRole.CASHIER);
+    }
+
+    private void showTemporaryPassword(String email, String temporaryPassword) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("User Created");
+        alert.setHeaderText("Temporary password for " + email);
+
+        TextArea passwordArea = new TextArea(temporaryPassword);
+        passwordArea.setEditable(false);
+        passwordArea.setWrapText(true);
+        passwordArea.setMaxWidth(Double.MAX_VALUE);
+        passwordArea.setMaxHeight(80);
+
+        Label warningLabel = new Label("Copy this password now. It will not be shown again, and the user must change it on first login.");
+        warningLabel.setWrapText(true);
+
+        VBox content = new VBox(8, warningLabel, passwordArea);
+        alert.getDialogPane().setContent(content);
+        alert.showAndWait();
+    }
+
+
+    private void showPasswordResetDelivery(UserService.PasswordResetRequestResult result) {
+        String message = "A password reset code was sent to " + result.email() + ".";
+
+        if (result.developmentOutboxFile() != null) {
+            message += "\n\nSMTP is not configured, so the demo email was written to:\n" + result.developmentOutboxFile();
+        }
+
+        showInfo("Password Reset Email", message);
     }
 
     private void showInfo(String title, String message) {

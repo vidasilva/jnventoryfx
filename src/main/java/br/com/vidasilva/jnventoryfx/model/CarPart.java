@@ -8,9 +8,7 @@ public class CarPart {
     private Supplier supplier;
     private double unitPrice;
     private int quantity;
-    private String warehouseAddress;
-    private int maxCapacity;
-    private int lowCapacityWarningTriggerLevel;
+    private WarehouseAddress warehouseAddress;
 
     public CarPart(
             int id,
@@ -20,9 +18,7 @@ public class CarPart {
             Supplier supplier,
             double unitPrice,
             int quantity,
-            String warehouseAddress,
-            int maxCapacity,
-            int lowCapacityWarningTriggerLevel
+            WarehouseAddress warehouseAddress
     ) {
         this.id = id;
         this.name = name;
@@ -32,8 +28,6 @@ public class CarPart {
         this.unitPrice = unitPrice;
         this.quantity = quantity;
         this.warehouseAddress = warehouseAddress;
-        this.maxCapacity = maxCapacity;
-        this.lowCapacityWarningTriggerLevel = lowCapacityWarningTriggerLevel;
     }
 
     public int getId() {
@@ -96,36 +90,32 @@ public class CarPart {
         this.quantity = quantity;
     }
 
-    public String getWarehouseAddress() {
+    public WarehouseAddress getWarehouseAddress() {
         return warehouseAddress;
     }
 
-    public void setWarehouseAddress(String warehouseAddress) {
+    public void setWarehouseAddress(WarehouseAddress warehouseAddress) {
         this.warehouseAddress = warehouseAddress;
     }
 
-    public int getMaxCapacity() {
-        return maxCapacity;
+    public String getWarehouseAddressLabel() {
+        return warehouseAddress == null ? "No location" : warehouseAddress.getFormattedAddress();
     }
 
-    public void setMaxCapacity(int maxCapacity) {
-        this.maxCapacity = maxCapacity;
+    public int getMaxCapacity() {
+        return warehouseAddress == null ? 0 : warehouseAddress.getMaxCapacity();
     }
 
     public int getLowCapacityWarningTriggerLevel() {
-        return lowCapacityWarningTriggerLevel;
-    }
-
-    public void setLowCapacityWarningTriggerLevel(int lowCapacityWarningTriggerLevel) {
-        this.lowCapacityWarningTriggerLevel = lowCapacityWarningTriggerLevel;
+        return warehouseAddress == null ? 0 : warehouseAddress.getLowCapacityWarningTriggerLevel();
     }
 
     public String getStockStatus() {
-        if (quantity <= lowCapacityWarningTriggerLevel) {
+        if (quantity <= getLowCapacityWarningTriggerLevel()) {
             return "LOW STOCK";
         }
 
-        if (quantity >= maxCapacity) {
+        if (quantity >= getMaxCapacity()) {
             return "FULL";
         }
 
