@@ -1,0 +1,4 @@
+.jnventoryfx-dev-key
+*.db
+*.db-shm
+*.db-wal
